@@ -83,9 +83,18 @@ public static class LlmServiceCollectionExtensions
 
         // Outer timeout covers all attempts; inner timeout bounds a single attempt.
         builder.AddTimeout(TimeSpan.FromSeconds(options.TimeoutSeconds));
+        if (options.MaxRetryAttempts > 0)
+        {
+            AddRetry(builder, options, logger);
+        }
+        builder.AddTimeout(TimeSpan.FromSeconds(options.AttemptTimeoutSeconds));
+    }
+
+    private static void AddRetry(ResiliencePipelineBuilder<HttpResponseMessage> builder, LlmOptions options, ILogger logger)
+    {
         builder.AddRetry(new HttpRetryStrategyOptions
         {
-            MaxRetryAttempts = Math.Max(0, options.MaxRetryAttempts),
+            MaxRetryAttempts = options.MaxRetryAttempts,
             BackoffType = DelayBackoffType.Exponential,
             UseJitter = true,
             Delay = TimeSpan.FromMilliseconds(options.RetryBaseDelayMs),
@@ -100,6 +109,5 @@ public static class LlmServiceCollectionExtensions
                 return ValueTask.CompletedTask;
             },
         });
-        builder.AddTimeout(TimeSpan.FromSeconds(options.AttemptTimeoutSeconds));
     }
 }

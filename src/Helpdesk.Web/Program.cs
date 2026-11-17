@@ -1,13 +1,13 @@
+using System.Text.Json.Serialization;
 using Helpdesk.Web.Data;
 using Helpdesk.Web.Models;
 using Helpdesk.Web.Services;
 using Helpdesk.Web.Services.Ai;
 using Helpdesk.Web.Services.Kb;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 

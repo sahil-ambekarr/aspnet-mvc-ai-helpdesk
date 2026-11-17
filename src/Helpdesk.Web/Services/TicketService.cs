@@ -52,9 +52,12 @@ public sealed class TicketService
         if (!string.IsNullOrWhiteSpace(filter.Q))
         {
             var q = filter.Q.Trim();
-            query = int.TryParse(q, out var id)
-                ? query.Where(t => t.Id == id || t.Title.Contains(q))
-                : query.Where(t => t.Title.Contains(q) || t.Description.Contains(q));
+            // LIKE is case-insensitive on both SQLite (ASCII) and the default SQL Server collation;
+            // string.Contains would translate to a case-sensitive instr() on SQLite.
+            var pattern = "%" + EscapeLike(q) + "%";
+            query = int.TryParse(q.TrimStart('#'), out var id)
+                ? query.Where(t => t.Id == id || EF.Functions.Like(t.Title, pattern, "\\"))
+                : query.Where(t => EF.Functions.Like(t.Title, pattern, "\\") || EF.Functions.Like(t.Description, pattern, "\\"));
         }
         if (user.IsAgent())
         {
@@ -208,6 +211,9 @@ public sealed class TicketService
             IsAgentView = user.IsAgent(),
         };
     }
+
+    private static string EscapeLike(string value) =>
+        value.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_").Replace("[", @"\[");
 
     private static IQueryable<TicketListItem> Project(IQueryable<Ticket> query) =>
         query.Select(t => new TicketListItem(

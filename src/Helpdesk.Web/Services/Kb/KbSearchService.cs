@@ -22,7 +22,7 @@ public sealed partial class KbSearchService
     private const int TagWeight = 2;
 
     /// <summary>Hits below this score are treated as "not found in KB".</summary>
-    public const double MinScore = 1.5;
+    public const double MinScore = 1.0;
 
     private static readonly HashSet<string> StopWords = new(StringComparer.Ordinal)
     {

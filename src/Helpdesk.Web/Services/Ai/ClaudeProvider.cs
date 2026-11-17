@@ -71,8 +71,11 @@ public sealed class ClaudeProvider : ILlmProvider
 
         return new LlmResult(
             text,
-            message.Model.ToString() ?? _options.Model,
+            ModelName(message) ?? _options.Model,
             (int?)message.Usage?.InputTokens,
             (int?)message.Usage?.OutputTokens);
     }
+
+    // Model is an SDK enum wrapper that also accepts unknown ids; Raw() holds the id string as sent by the API.
+    private static string? ModelName(Message message) => message.Model.Raw().ToString() is { Length: > 0 } id ? id : null;
 }
