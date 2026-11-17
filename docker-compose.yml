@@ -1,0 +1,45 @@
+# Demo stack: web + SQL Server + Ollama. NOT verified locally (no Docker on the build machine).
+# After the first start, pull the model once:  docker compose exec ollama ollama pull llama3.2
+services:
+  web:
+    build: .
+    ports:
+      - "4110:8080"
+    environment:
+      # Development loads the demo users and seed data from appsettings.Development.json.
+      ASPNETCORE_ENVIRONMENT: Development
+      Database__Provider: SqlServer
+      ConnectionStrings__SqlServer: "Server=sqlserver,1433;Database=Helpdesk;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-haiku-5-5}
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    restart: on-failure
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?set MSSQL_SA_PASSWORD in .env}
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama-models:/root/.ollama
+
+volumes:
+  mssql-data:
+  ollama-models:
