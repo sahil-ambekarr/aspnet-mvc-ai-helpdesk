@@ -1,0 +1,48 @@
+@model TicketCreateModel
+@{
+    ViewData["Title"] = "New ticket";
+}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <h1 class="h3 mb-3">Raise a ticket</h1>
+        <div class="alert alert-light border small">
+            Before raising a ticket, check the <a asp-controller="Kb" asp-action="Index">knowledge base</a>; it may already have the answer.
+        </div>
+        <form asp-action="Create" method="post" class="card shadow-sm">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label"></label>
+                    <input asp-for="Title" class="form-control" placeholder="Short summary of the problem" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label asp-for="Category" class="form-label"></label>
+                        <select asp-for="Category" class="form-select" asp-items="Html.GetEnumSelectList<TicketCategory>()">
+                            <option value="">Choose...</option>
+                        </select>
+                        <span asp-validation-for="Category" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label asp-for="Priority" class="form-label"></label>
+                        <select asp-for="Priority" class="form-select" asp-items="Html.GetEnumSelectList<TicketPriority>()"></select>
+                        <span asp-validation-for="Priority" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="7" placeholder="What happened, what you expected, and what you have tried"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="card-footer bg-white d-flex gap-2 justify-content-end">
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Submit ticket</button>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

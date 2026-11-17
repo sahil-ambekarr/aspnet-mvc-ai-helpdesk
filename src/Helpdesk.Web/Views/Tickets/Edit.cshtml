@@ -1,0 +1,61 @@
+@model TicketEditModel
+@{
+    ViewData["Title"] = $"Edit ticket #{Model.Id}";
+}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a asp-action="Index">Tickets</a></li>
+                <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.Id">#@Model.Id</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Edit</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-3">Edit ticket #@Model.Id</h1>
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="card shadow-sm">
+            <input type="hidden" asp-for="Id" />
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-6 col-md-3">
+                        <label asp-for="Status" class="form-label"></label>
+                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<TicketStatus>()"></select>
+                        <span asp-validation-for="Status" class="text-danger small"></span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label asp-for="Priority" class="form-label"></label>
+                        <select asp-for="Priority" class="form-select" asp-items="Html.GetEnumSelectList<TicketPriority>()"></select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label asp-for="Category" class="form-label"></label>
+                        <select asp-for="Category" class="form-select" asp-items="Html.GetEnumSelectList<TicketCategory>()"></select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label asp-for="AssigneeId" class="form-label"></label>
+                        <select asp-for="AssigneeId" class="form-select" asp-items="Model.Agents">
+                            <option value="">Unassigned</option>
+                        </select>
+                        <span asp-validation-for="AssigneeId" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="7"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="card-footer bg-white d-flex gap-2 justify-content-end">
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

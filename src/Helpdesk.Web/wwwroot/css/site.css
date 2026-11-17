@@ -1,22 +1,49 @@
-html {
-  font-size: 14px;
+:root {
+  --app-navy: #1f2a44;
+  --app-accent: #2f6fde;
+  --app-bg: #f4f6fa;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+html { font-size: 15px; }
+body { background: var(--app-bg); color: #1d2433; }
+
+.app-navbar { background: var(--app-navy); }
+.app-navbar .nav-link.active { font-weight: 600; }
+.brand-mark {
+  display: inline-block; background: var(--app-accent); color: #fff; border-radius: .35rem;
+  padding: .05rem .4rem; margin-right: .35rem; font-size: .85rem; letter-spacing: .03em;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
+.card { border-color: #e2e6ee; }
+.card-header { border-bottom-color: #e2e6ee; }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
+.kpi { color: inherit; }
+.kpi:hover { border-color: var(--app-accent); }
+.kpi-label { font-size: .8rem; color: #5b6475; text-transform: uppercase; letter-spacing: .04em; }
+.kpi-value { font-size: 2rem; font-weight: 600; line-height: 1.2; }
 
-body {
-  margin-bottom: 60px;
+.bar-row { display: grid; grid-template-columns: 9.5rem 1fr 2.5rem; align-items: center; gap: .75rem; padding: .3rem 0; color: inherit; }
+.bar-row:hover .bar-label { text-decoration: underline; }
+.bar-track { background: #e9edf4; border-radius: .25rem; height: .75rem; overflow: hidden; }
+.bar-fill { display: block; height: 100%; background: var(--app-accent); border-radius: .25rem; min-width: 2px; }
+.bar-fill-alt { background: #6b7fa8; }
+.bar-value { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.ticket-id { font-variant-numeric: tabular-nums; min-width: 2.5rem; }
+
+.table td, .table th { vertical-align: middle; }
+.ticket-body { white-space: pre-wrap; }
+.comment { border-left: 3px solid #d5dbe6; }
+.comment.comment-agent { border-left-color: var(--app-accent); }
+
+.ai-panel { border-color: #c9d7f3; }
+.ai-panel .card-header { background: #eef3fd; }
+.ai-output { white-space: pre-wrap; background: #fbfcfe; border: 1px solid #e2e6ee; border-radius: .375rem; padding: .75rem; font-size: .95rem; }
+.ai-meta { font-size: .78rem; color: #5b6475; }
+.ai-note { font-size: .78rem; color: #5b6475; }
+
+.kb-body p { margin-bottom: .8rem; }
+
+@media (max-width: 575.98px) {
+  .bar-row { grid-template-columns: 7rem 1fr 2rem; }
+  .kpi-value { font-size: 1.6rem; }
 }

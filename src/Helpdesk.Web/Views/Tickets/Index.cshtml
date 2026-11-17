@@ -1,0 +1,141 @@
+@model TicketListViewModel
+@inject TimeProvider Clock
+@{
+    ViewData["Title"] = "Tickets";
+    var f = Model.Filter;
+    var r = Model.Result;
+    var now = Clock.GetUtcNow().UtcDateTime;
+    var isAgent = User.IsAgent();
+
+    Dictionary<string, string> RouteFor(int page)
+    {
+        var d = new Dictionary<string, string> { ["page"] = page.ToString() };
+        if (f.Status is not null) d["status"] = f.Status.ToString()!;
+        if (f.Priority is not null) d["priority"] = f.Priority.ToString()!;
+        if (f.Category is not null) d["category"] = f.Category.ToString()!;
+        if (!string.IsNullOrWhiteSpace(f.Q)) d["q"] = f.Q!;
+        if (!string.IsNullOrWhiteSpace(f.Scope)) d["scope"] = f.Scope!;
+        return d;
+    }
+}
+<div class="d-flex flex-wrap justify-content-between align-items-end mb-3 gap-2">
+    <div>
+        <h1 class="h3 mb-0">Tickets</h1>
+        <div class="text-muted small">@r.TotalCount ticket(s)@(isAgent ? "" : " raised by you")</div>
+    </div>
+    <a class="btn btn-primary" asp-action="Create">New ticket</a>
+</div>
+
+<form method="get" asp-action="Index" class="card shadow-sm mb-3">
+    <div class="card-body row g-2 align-items-end">
+        <div class="col-12 col-md-4 col-lg-3">
+            <label class="form-label small mb-1" for="q">Search</label>
+            <input class="form-control" id="q" name="q" value="@f.Q" placeholder="Title, description or #id" maxlength="100" />
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <label class="form-label small mb-1" for="status">Status</label>
+            <select class="form-select" id="status" name="status">
+                <option value="">Any</option>
+                @foreach (var s in Enum.GetValues<TicketStatus>())
+                {
+                    <option value="@s" selected="@(f.Status == s)">@Ui.Label(s)</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <label class="form-label small mb-1" for="priority">Priority</label>
+            <select class="form-select" id="priority" name="priority">
+                <option value="">Any</option>
+                @foreach (var p in Enum.GetValues<TicketPriority>())
+                {
+                    <option value="@p" selected="@(f.Priority == p)">@p</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <label class="form-label small mb-1" for="category">Category</label>
+            <select class="form-select" id="category" name="category">
+                <option value="">Any</option>
+                @foreach (var c in Enum.GetValues<TicketCategory>())
+                {
+                    <option value="@c" selected="@(f.Category == c)">@c</option>
+                }
+            </select>
+        </div>
+        @if (isAgent)
+        {
+            <div class="col-6 col-md-4 col-lg-1">
+                <label class="form-label small mb-1" for="scope">Queue</label>
+                <select class="form-select" id="scope" name="scope">
+                    <option value="" selected="@(string.IsNullOrEmpty(f.Scope))">All</option>
+                    <option value="mine" selected="@(f.Scope == "mine")">Mine</option>
+                    <option value="unassigned" selected="@(f.Scope == "unassigned")">Unassigned</option>
+                </select>
+            </div>
+        }
+        <div class="col-12 col-md-4 col-lg-2 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary flex-grow-1">Filter</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+        </div>
+    </div>
+</form>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Title</th>
+                    <th scope="col" class="d-none d-md-table-cell">Category</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="d-none d-lg-table-cell">Requester</th>
+                    <th scope="col" class="d-none d-lg-table-cell">Assignee</th>
+                    <th scope="col" class="d-none d-sm-table-cell">Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in r.Items)
+                {
+                    <tr>
+                        <td class="text-muted ticket-id">@t.Id</td>
+                        <td><a asp-action="Details" asp-route-id="@t.Id" class="fw-medium">@t.Title</a></td>
+                        <td class="d-none d-md-table-cell">@t.Category</td>
+                        <td><partial name="_PriorityBadge" model="t.Priority" /></td>
+                        <td><partial name="_StatusBadge" model="t.Status" /></td>
+                        <td class="d-none d-lg-table-cell">@t.RequesterName</td>
+                        <td class="d-none d-lg-table-cell">@(t.AssigneeName ?? "-")</td>
+                        <td class="d-none d-sm-table-cell text-muted small text-nowrap">@Ui.Ago(t.UpdatedAt, now)</td>
+                    </tr>
+                }
+                @if (r.Items.Count == 0)
+                {
+                    <tr><td colspan="8" class="text-center text-muted py-4">No tickets match these filters.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (r.TotalPages > 1)
+    {
+        <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <span class="small text-muted">Page @r.Page of @r.TotalPages</span>
+            <nav aria-label="Ticket pages">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(r.Page <= 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-all-route-data="RouteFor(r.Page - 1)">Previous</a>
+                    </li>
+                    @for (var p = 1; p <= r.TotalPages; p++)
+                    {
+                        <li class="page-item @(p == r.Page ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-all-route-data="RouteFor(p)">@p</a>
+                        </li>
+                    }
+                    <li class="page-item @(r.Page >= r.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-all-route-data="RouteFor(r.Page + 1)">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

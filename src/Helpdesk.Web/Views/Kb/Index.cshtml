@@ -1,0 +1,62 @@
+@model IReadOnlyList<KbArticle>
+@{
+    ViewData["Title"] = "Knowledge base";
+    var q = ViewData["Query"] as string;
+    var category = ViewData["Category"] as TicketCategory?;
+}
+<div class="d-flex flex-wrap justify-content-between align-items-end mb-3 gap-2">
+    <div>
+        <h1 class="h3 mb-0">Knowledge base</h1>
+        <div class="text-muted small">@Model.Count article(s)@(string.IsNullOrWhiteSpace(q) ? "" : $" matching \"{q}\"")</div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-8">
+        <form method="get" asp-action="Index" class="card shadow-sm mb-3">
+            <div class="card-body row g-2 align-items-end">
+                <div class="col-12 col-md-7">
+                    <label class="form-label small mb-1" for="kb-q">Keyword search</label>
+                    <input class="form-control" id="kb-q" name="q" value="@q" maxlength="200" placeholder="vpn, printer, password..." />
+                </div>
+                <div class="col-8 col-md-3">
+                    <label class="form-label small mb-1" for="kb-category">Category</label>
+                    <select class="form-select" id="kb-category" name="category">
+                        <option value="">Any</option>
+                        @foreach (var c in Enum.GetValues<TicketCategory>())
+                        {
+                            <option value="@c" selected="@(category == c)">@c</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-4 col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="list-group shadow-sm">
+            @foreach (var a in Model)
+            {
+                <a class="list-group-item list-group-item-action py-3" asp-route="kb-article" asp-route-slug="@a.Slug">
+                    <div class="d-flex justify-content-between gap-2">
+                        <span class="fw-semibold">@a.Title</span>
+                        <span class="badge text-bg-light border align-self-start">@a.Category</span>
+                    </div>
+                    <div class="small text-muted mt-1">@a.Summary</div>
+                </a>
+            }
+            @if (Model.Count == 0)
+            {
+                <div class="list-group-item text-muted">No articles found. Try other keywords or <a asp-controller="Tickets" asp-action="Create">raise a ticket</a>.</div>
+            }
+        </div>
+    </div>
+    <div class="col-12 col-lg-4">
+        <partial name="_AssistantPanel" model="new AssistantPanelModel(null, false)" />
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/assistant.js" asp-append-version="true"></script>
+}

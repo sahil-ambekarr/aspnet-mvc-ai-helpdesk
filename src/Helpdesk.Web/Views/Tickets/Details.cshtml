@@ -1,0 +1,94 @@
+@model TicketDetailViewModel
+@inject TimeProvider Clock
+@{
+    var t = Model.Ticket;
+    ViewData["Title"] = $"#{t.Id} {t.Title}";
+    var now = Clock.GetUtcNow().UtcDateTime;
+}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-action="Index">Tickets</a></li>
+        <li class="breadcrumb-item active" aria-current="page">#@t.Id</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
+                    <h1 class="h4 mb-0">@t.Title</h1>
+                    @if (Model.CanEdit)
+                    {
+                        <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-sm btn-outline-primary align-self-start">Edit</a>
+                    }
+                </div>
+                <div class="d-flex flex-wrap gap-2 align-items-center mb-3 small">
+                    <partial name="_StatusBadge" model="t.Status" />
+                    <partial name="_PriorityBadge" model="t.Priority" />
+                    <span class="badge text-bg-light border">@t.Category</span>
+                    <span class="text-muted">Opened by @t.Requester?.DisplayName, @Ui.Ago(t.CreatedAt, now)</span>
+                </div>
+                <div class="ticket-body">@t.Description</div>
+            </div>
+        </div>
+
+        <h2 class="h6 text-uppercase text-muted mb-2">Conversation (@t.Comments.Count)</h2>
+        @foreach (var c in t.Comments)
+        {
+            var fromAgent = c.AuthorId != t.RequesterId;
+            <div class="card shadow-sm mb-2 comment @(fromAgent ? "comment-agent" : "")">
+                <div class="card-body py-2">
+                    <div class="small mb-1">
+                        <span class="fw-semibold">@c.Author?.DisplayName</span>
+                        @if (fromAgent)
+                        {
+                            <span class="badge text-bg-primary-subtle text-primary-emphasis ms-1">Agent</span>
+                        }
+                        <span class="text-muted ms-1" title="@c.CreatedAt.ToString("u")">@Ui.Ago(c.CreatedAt, now)</span>
+                    </div>
+                    <div class="ticket-body">@c.Body</div>
+                </div>
+            </div>
+        }
+        @if (t.Comments.Count == 0)
+        {
+            <p class="text-muted small">No replies yet.</p>
+        }
+
+        <form asp-action="Comment" asp-route-id="@t.Id" method="post" class="card shadow-sm mt-3">
+            <div class="card-body">
+                <label asp-for="NewComment.Body" class="form-label fw-semibold"></label>
+                <textarea asp-for="NewComment.Body" id="reply-body" class="form-control" rows="6" placeholder="Write a reply"></textarea>
+                <span asp-validation-for="NewComment.Body" class="text-danger small"></span>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center gap-2">
+                <span class="small text-muted">Replies are visible to the requester and the agents.</span>
+                <button type="submit" class="btn btn-primary">Post reply</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-12 col-lg-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body small">
+                <dl class="row mb-0">
+                    <dt class="col-5 fw-normal text-muted">Requester</dt>
+                    <dd class="col-7">@t.Requester?.DisplayName</dd>
+                    <dt class="col-5 fw-normal text-muted">Assignee</dt>
+                    <dd class="col-7">@(t.Assignee?.DisplayName ?? "Unassigned")</dd>
+                    <dt class="col-5 fw-normal text-muted">Created</dt>
+                    <dd class="col-7">@t.CreatedAt.ToString("d MMM yyyy HH:mm") UTC</dd>
+                    <dt class="col-5 fw-normal text-muted">Last update</dt>
+                    <dd class="col-7 mb-0">@Ui.Ago(t.UpdatedAt, now)</dd>
+                </dl>
+            </div>
+        </div>
+        <partial name="_AssistantPanel" model="new AssistantPanelModel(t.Id, Model.CanUseTicketAssistant)" />
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/assistant.js" asp-append-version="true"></script>
+}

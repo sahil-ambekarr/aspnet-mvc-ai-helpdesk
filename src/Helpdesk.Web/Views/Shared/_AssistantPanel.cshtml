@@ -1,0 +1,43 @@
+@model AssistantPanelModel
+@* AI assistant widget. Behaviour lives in wwwroot/js/assistant.js; output is rendered as text, never HTML. *@
+<div class="card shadow-sm ai-panel" id="ai-assistant" data-ticket-id="@Model.TicketId">
+    @Html.AntiForgeryToken()
+    <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+        <span>AI assistant</span>
+        <span class="badge text-bg-light border fw-normal">draft only</span>
+    </div>
+    <div class="card-body">
+        @if (Model.ShowTicketTools && Model.TicketId is not null)
+        {
+            <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" data-ai-action="summary">Summarise thread</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-ai-action="reply-draft">Draft reply</button>
+            </div>
+            <p class="ai-note mb-3">Drafts are never sent automatically. Review and edit before posting.</p>
+        }
+
+        <form class="mb-2" data-ai-kb-form novalidate>
+            <label for="ai-question" class="form-label small fw-semibold mb-1">Ask the knowledge base</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control" id="ai-question" maxlength="500" minlength="3" required
+                       placeholder="e.g. How do I reset my password?" />
+                <button type="submit" class="btn btn-primary">Ask</button>
+            </div>
+        </form>
+
+        <div class="ai-result d-none" aria-live="polite" data-ai-result>
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-1">
+                <span class="small fw-semibold" data-ai-title></span>
+                <button type="button" class="btn btn-sm btn-link p-0 d-none" data-ai-insert>Insert into reply box</button>
+            </div>
+            <div class="ai-loading small text-muted d-none" data-ai-loading>
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Working... a local CPU model can take a minute.
+            </div>
+            <div class="ai-output d-none" data-ai-output></div>
+            <ul class="small mt-2 mb-0 ps-3 d-none" data-ai-sources></ul>
+            <div class="ai-meta mt-2" data-ai-meta></div>
+            <div class="alert alert-warning small mt-2 mb-0 d-none" data-ai-error></div>
+        </div>
+    </div>
+</div>

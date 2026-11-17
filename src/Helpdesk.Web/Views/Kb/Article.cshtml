@@ -1,0 +1,52 @@
+@model KbArticle
+@{
+    ViewData["Title"] = Model.Title;
+}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-action="Index">Knowledge base</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+    </ol>
+</nav>
+<div class="row g-4">
+    <div class="col-12 col-lg-8">
+        <article class="card shadow-sm">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
+                    <h1 class="h4 mb-0">@Model.Title</h1>
+                    <span class="badge text-bg-light border align-self-start">@Model.Category</span>
+                </div>
+                <p class="lead fs-6 text-muted">@Model.Summary</p>
+                <div class="kb-body">
+                    @foreach (var para in Ui.Paragraphs(Model.Body))
+                    {
+                        var lines = para.Split('\n');
+                        var intro = lines.TakeWhile(l => !l.TrimStart().StartsWith("- ")).ToList();
+                        var bullets = lines.SkipWhile(l => !l.TrimStart().StartsWith("- ")).ToList();
+                        if (intro.Count > 0)
+                        {
+                            <p>@string.Join(" ", intro)</p>
+                        }
+                        if (bullets.Count > 0)
+                        {
+                            <ul>
+                                @foreach (var b in bullets)
+                                {
+                                    <li>@b.TrimStart().TrimStart('-').Trim()</li>
+                                }
+                            </ul>
+                        }
+                    }
+                </div>
+                <div class="small text-muted border-top pt-2 mt-3">Last updated @Model.UpdatedAt.ToString("d MMM yyyy")</div>
+            </div>
+        </article>
+    </div>
+    <div class="col-12 col-lg-4">
+        <partial name="_AssistantPanel" model="new AssistantPanelModel(null, false)" />
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/assistant.js" asp-append-version="true"></script>
+}

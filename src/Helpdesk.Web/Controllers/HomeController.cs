@@ -1,31 +1,24 @@
 using System.Diagnostics;
+using Helpdesk.Web.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Helpdesk.Web.Models;
 
 namespace Helpdesk.Web.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly TicketService _tickets;
 
-    public HomeController(ILogger<HomeController> logger)
-    {
-        _logger = logger;
-    }
+    public HomeController(TicketService tickets) => _tickets = tickets;
 
-    public IActionResult Index()
-    {
-        return View();
-    }
+    public async Task<IActionResult> Index(CancellationToken ct) =>
+        View(await _tickets.GetDashboardAsync(User, ct));
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
-
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        ViewData["RequestId"] = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+        return View();
     }
 }

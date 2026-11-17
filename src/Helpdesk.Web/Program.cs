@@ -5,7 +5,9 @@ using Helpdesk.Web.Services.Ai;
 using Helpdesk.Web.Services.Kb;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,10 @@ builder.Services.ConfigureApplicationCookie(o =>
     o.Cookie.SameSite = SameSiteMode.Lax;
     o.SlidingExpiration = true;
     o.ExpireTimeSpan = TimeSpan.FromHours(8);
+
+    // JSON API callers get status codes instead of a redirect to the login page.
+    o.Events.OnRedirectToLogin = ctx => ApiAwareRedirect(ctx, StatusCodes.Status401Unauthorized);
+    o.Events.OnRedirectToAccessDenied = ctx => ApiAwareRedirect(ctx, StatusCodes.Status403Forbidden);
 });
 
 // Every endpoint requires a signed-in user unless it opts out with [AllowAnonymous].
@@ -39,7 +45,8 @@ builder.Services.AddAuthorization(o =>
 // The assistant widget sends the antiforgery token in this header on its JSON POSTs.
 builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<TicketService>();
@@ -72,6 +79,17 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+static Task ApiAwareRedirect(RedirectContext<CookieAuthenticationOptions> ctx, int statusCode)
+{
+    if (ctx.Request.Path.StartsWithSegments("/api"))
+    {
+        ctx.Response.StatusCode = statusCode;
+        return Task.CompletedTask;
+    }
+    ctx.Response.Redirect(ctx.RedirectUri);
+    return Task.CompletedTask;
+}
 
 public partial class Program
 {

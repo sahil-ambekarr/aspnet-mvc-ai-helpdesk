@@ -127,3 +127,5 @@ public sealed class LoginViewModel
 
     public string? ReturnUrl { get; set; }
 }
+
+public sealed record AssistantPanelModel(int? TicketId, bool ShowTicketTools);
