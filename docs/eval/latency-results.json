@@ -1,0 +1,171 @@
+{
+  "measuredAt": "2026-11-18T03:31:53.392Z",
+  "base": "http://localhost:4110",
+  "rows": [
+    {
+      "feature": "TicketSummary",
+      "target": "ticket 1",
+      "status": 200,
+      "wallMs": 10532,
+      "serverLatencyMs": 10518,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 4
+    },
+    {
+      "feature": "ReplyDraft",
+      "target": "ticket 1",
+      "status": 200,
+      "wallMs": 15431,
+      "serverLatencyMs": 15411,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 5
+    },
+    {
+      "feature": "TicketSummary",
+      "target": "ticket 3",
+      "status": 200,
+      "wallMs": 19654,
+      "serverLatencyMs": 19635,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 6
+    },
+    {
+      "feature": "ReplyDraft",
+      "target": "ticket 3",
+      "status": 200,
+      "wallMs": 26323,
+      "serverLatencyMs": 26308,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 7
+    },
+    {
+      "feature": "TicketSummary",
+      "target": "ticket 5",
+      "status": 200,
+      "wallMs": 21536,
+      "serverLatencyMs": 21523,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 8
+    },
+    {
+      "feature": "ReplyDraft",
+      "target": "ticket 5",
+      "status": 200,
+      "wallMs": 18973,
+      "serverLatencyMs": 18959,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 9
+    },
+    {
+      "feature": "TicketSummary",
+      "target": "ticket 14",
+      "status": 200,
+      "wallMs": 13467,
+      "serverLatencyMs": 13454,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 10
+    },
+    {
+      "feature": "ReplyDraft",
+      "target": "ticket 14",
+      "status": 200,
+      "wallMs": 13055,
+      "serverLatencyMs": 13041,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 11
+    },
+    {
+      "feature": "TicketSummary",
+      "target": "ticket 29",
+      "status": 200,
+      "wallMs": 12179,
+      "serverLatencyMs": 12169,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 12
+    },
+    {
+      "feature": "ReplyDraft",
+      "target": "ticket 29",
+      "status": 200,
+      "wallMs": 14607,
+      "serverLatencyMs": 14589,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 13
+    },
+    {
+      "feature": "KbAnswer",
+      "target": "My VPN keeps dropping every hour when I work from home. What should I do?",
+      "status": 200,
+      "wallMs": 11389,
+      "serverLatencyMs": 11377,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 14
+    },
+    {
+      "feature": "KbAnswer",
+      "target": "I forgot my password and my account is locked",
+      "status": 200,
+      "wallMs": 20187,
+      "serverLatencyMs": 20168,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 15
+    },
+    {
+      "feature": "KbAnswer",
+      "target": "How do I give visitors Wi-Fi access?",
+      "status": 200,
+      "wallMs": 18611,
+      "serverLatencyMs": 18599,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 16
+    },
+    {
+      "feature": "KbAnswer",
+      "target": "Colleagues hear an echo in my video calls",
+      "status": 200,
+      "wallMs": 19613,
+      "serverLatencyMs": 19595,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": true,
+      "interactionId": 17
+    },
+    {
+      "feature": "KbAnswer",
+      "target": "What is the parking policy for the new office?",
+      "status": 200,
+      "wallMs": 8848,
+      "serverLatencyMs": 8838,
+      "provider": "ollama",
+      "model": "llama3.2",
+      "found": false,
+      "interactionId": 18
+    }
+  ]
+}
