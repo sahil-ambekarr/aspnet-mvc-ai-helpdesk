@@ -36,6 +36,7 @@ public static partial class PromptBuilder
             Cite the articles you used as [1], [2] and so on, matching their numbers.
             If the articles do not answer the question, reply with exactly {NotFoundToken} and nothing else.
             Keep the answer under 120 words. Use short steps when the answer is a procedure.
+            Write plain text without XML tags, and put each citation right after the sentence it supports.
             {UntrustedRule}
             """;
 
@@ -72,12 +73,14 @@ public static partial class PromptBuilder
 
     public static LlmRequest ReplyDraft(Ticket ticket, string agentName, IReadOnlyList<KbHit> relatedArticles)
     {
+        var firstName = FirstName(ticket.Requester?.DisplayName);
         var system = $"""
             You are helping an IT helpdesk agent named {Sanitize(agentName)} write a reply to the requester of the ticket below.
-            Write the reply only: a greeting with the requester's first name, 2 to 5 short sentences that move the
-            ticket forward (answer the latest question or give the next concrete step), and a sign-off with the agent's name.
-            Plain text, under 150 words. Do not promise anything the agent has not done and do not say the issue is fixed
-            unless the thread says so. If a related KB article helps, mention it by its title.
+            Write the reply only. Start with "Hi {firstName}," then write 2 to 5 short sentences that move the ticket forward
+            (answer the latest question or give the next concrete step), and end with "Best regards," and the agent's name.
+            Plain text, under 150 words, no XML tags or placeholders. Do not promise anything the agent has not done,
+            do not say the issue is fixed unless the thread says so, and do not invent version numbers, names, dates
+            or checks that are not in the ticket or the KB articles. If a related KB article helps, mention it by its title.
             The agent will review and edit your draft before sending.
             {UntrustedRule}
             """;
@@ -141,8 +144,24 @@ public static partial class PromptBuilder
         return DelimiterTag().Replace(text, m => $"[{m.Groups[1].Value.Trim('/', ' ')}]");
     }
 
+    internal static string FirstName(string? displayName)
+    {
+        var first = Sanitize(displayName).Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+        return string.IsNullOrEmpty(first) ? "there" : first;
+    }
+
+    /// <summary>
+    /// Small models sometimes wrap answers in tags such as &lt;answer&gt; or echo a placeholder like &lt;Dana&gt;.
+    /// Strip bare tags; the text is rendered with textContent in the browser anyway, so this is cosmetic, not a security control.
+    /// </summary>
+    public static string CleanOutput(string text) =>
+        StrayTag().Replace(text, m => m.Groups[1].Value.Contains(' ') ? m.Groups[1].Value : string.Empty).Trim();
+
     private static string Clip(string text, int max) =>
         text.Length <= max ? text : text[..max] + " [truncated]";
+
+    [GeneratedRegex(@"</?([A-Za-z][A-Za-z _]{0,40})>")]
+    private static partial Regex StrayTag();
 
     [GeneratedRegex(@"<\s*(/?\s*(?:ticket_data|question|kb_articles|system|instructions?)[^>]*)>", RegexOptions.IgnoreCase)]
     private static partial Regex DelimiterTag();

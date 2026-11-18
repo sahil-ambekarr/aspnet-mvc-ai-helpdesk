@@ -43,7 +43,7 @@
                         <span class="fw-semibold">@c.Author?.DisplayName</span>
                         @if (fromAgent)
                         {
-                            <span class="badge text-bg-primary-subtle text-primary-emphasis ms-1">Agent</span>
+                            <span class="badge bg-primary-subtle text-primary-emphasis ms-1">Agent</span>
                         }
                         <span class="text-muted ms-1" title="@c.CreatedAt.ToString("u")">@Ui.Ago(c.CreatedAt, now)</span>
                     </div>

@@ -7,7 +7,8 @@ using Helpdesk.Web.Services.Kb;
 
 namespace Helpdesk.Web.Services.Ai;
 
-public sealed record AssistantSource(int Id, string Title, string Url, double Score);
+/// <param name="Number">Citation number used in the answer text ([1], [2]...); 0 when not a KB answer citation.</param>
+public sealed record AssistantSource(int Id, string Title, string Url, double Score, int Number = 0);
 
 public sealed record AssistantResult(
     AiInteractionType Type,
@@ -81,7 +82,10 @@ public sealed class AssistantService
                 _llm.Name, result.Model, latency, interactionId);
         }
 
-        var sources = hits.Select(h => new AssistantSource(h.Article.Id, h.Article.Title, $"/kb/{h.Article.Slug}", h.Score)).ToList();
+        // Link only the articles the answer cites; fall back to all retrieved ones if it cites none.
+        var numbered = hits.Select((h, i) => new AssistantSource(h.Article.Id, h.Article.Title, $"/kb/{h.Article.Slug}", h.Score, i + 1)).ToList();
+        var cited = numbered.Where(s => result.Text.Contains($"[{s.Number}]", StringComparison.Ordinal)).ToList();
+        var sources = cited.Count > 0 ? cited : numbered;
         return new AssistantResult(AiInteractionType.KbAnswer, result.Text, true, sources, _llm.Name, result.Model, latency, interactionId);
     }
 
@@ -124,8 +128,9 @@ public sealed class AssistantService
         var sw = Stopwatch.StartNew();
         try
         {
-            var result = await _llm.CompleteAsync(request, ct);
+            var raw = await _llm.CompleteAsync(request, ct);
             sw.Stop();
+            var result = raw with { Text = PromptBuilder.CleanOutput(raw.Text) };
 
             audit.Succeeded = true;
             audit.Model = Clip(result.Model, 80);

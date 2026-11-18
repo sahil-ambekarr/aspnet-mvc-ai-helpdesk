@@ -67,6 +67,22 @@ public class PromptBuilderTests
         Assert.Contains($"comment {PromptBuilder.MaxComments + 2}", prompt);
     }
 
+    [Theory]
+    [InlineData("<answer>\nUse the portal.</answer>", "Use the portal.")]
+    [InlineData("<Dana Whitfield>\n\nThanks for the update.", "Dana Whitfield\n\nThanks for the update.")]
+    [InlineData("If x < 5 then retry.", "If x < 5 then retry.")]
+    public void CleanOutput_strips_stray_tags_from_model_text(string input, string expected)
+    {
+        Assert.Equal(expected, PromptBuilder.CleanOutput(input));
+    }
+
+    [Fact]
+    public void Reply_draft_prompt_names_the_requester_first_name()
+    {
+        var ticket = new Ticket { Id = 1, Title = "t", Description = "d", Requester = new ApplicationUser { DisplayName = "Dana Whitfield" } };
+        Assert.Contains("Start with \"Hi Dana,\"", PromptBuilder.ReplyDraft(ticket, "Priya", Array.Empty<KbHit>()).SystemPrompt);
+    }
+
     private static int Count(string haystack, string needle) =>
         (haystack.Length - haystack.Replace(needle, string.Empty).Length) / needle.Length;
 }
@@ -233,6 +249,17 @@ public class AssistantServiceTests : IDisposable
         Assert.Equal(TestDatabase.RequesterA.Id, audit.CreatedById);
         Assert.Equal(result.InteractionId, audit.Id);
         Assert.NotNull(audit.OutputTokens);
+    }
+
+    [Fact]
+    public async Task Kb_answer_links_only_the_articles_it_cites()
+    {
+        using var ctx = _db.CreateContext();
+        var llm = new CountingProvider { FixedText = "Check your mail app [2]." };
+        var result = await Create(ctx, llm).AnswerFromKbAsync("password reset email phone", TestDatabase.AgentPrincipal);
+
+        var source = Assert.Single(result.Sources);
+        Assert.Equal(2, source.Number);
     }
 
     [Fact]

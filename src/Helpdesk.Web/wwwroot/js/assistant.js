@@ -75,11 +75,11 @@
       label.textContent = "Related articles:";
       sources.appendChild(label);
     }
-    data.sources.forEach((s, i) => {
+    data.sources.forEach((s) => {
       const li = document.createElement("li");
       const a = document.createElement("a");
       a.href = s.url;
-      a.textContent = data.type === "KbAnswer" ? `[${i + 1}] ${s.title}` : s.title;
+      a.textContent = s.number > 0 ? `[${s.number}] ${s.title}` : s.title;
       a.target = "_blank";
       a.rel = "noopener";
       li.appendChild(a);
